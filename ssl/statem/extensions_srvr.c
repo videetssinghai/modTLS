@@ -94,6 +94,85 @@ int tls_parse_ctos_renegotiate(SSL *s, PACKET *pkt, unsigned int context,
  *   extension.
  * - On session reconnect, the servername extension may be absent.
  */
+
+int tls_parse_ctos_middlebox(SSL *s, PACKET *pkt, unsigned int context,
+                               X509 *x, size_t chainidx)
+{
+    unsigned int servname_type;
+    PACKET sni, hostname;
+
+    if (!PACKET_as_length_prefixed_2(pkt, &sni)
+        /* ServerNameList must be at least 1 byte long. */
+        || PACKET_remaining(&sni) == 0) {
+        SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PARSE_CTOS_SERVER_NAME,
+                 SSL_R_BAD_EXTENSION);
+        return 0;
+    }
+
+    /*
+     * Although the intent was for server_name to be extensible, RFC 4366
+     * was not clear about it; and so OpenSSL among other implementations,
+     * always and only allows a 'host_name' name types.
+     * RFC 6066 corrected the mistake but adding new name types
+     * is nevertheless no longer feasible, so act as if no other
+     * SNI types can exist, to simplify parsing.
+     *
+     * Also note that the RFC permits only one SNI value per type,
+     * i.e., we can only have a single hostname.
+     */
+    if (!PACKET_get_1(&sni, &servname_type)
+        || servname_type != TLSEXT_NAMETYPE_host_name
+        || !PACKET_as_length_prefixed_2(&sni, &hostname)) {
+        SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PARSE_CTOS_SERVER_NAME,
+                 SSL_R_BAD_EXTENSION);
+        return 0;
+    }
+
+    if (!s->hit || SSL_IS_TLS13(s)) {
+        if (PACKET_remaining(&hostname) > TLSEXT_MAXLEN_host_name) {
+            SSLfatal(s, SSL_AD_UNRECOGNIZED_NAME,
+                     SSL_F_TLS_PARSE_CTOS_SERVER_NAME,
+                     SSL_R_BAD_EXTENSION);
+            return 0;
+        }
+
+        if (PACKET_contains_zero_byte(&hostname)) {
+            SSLfatal(s, SSL_AD_UNRECOGNIZED_NAME,
+                     SSL_F_TLS_PARSE_CTOS_SERVER_NAME,
+                     SSL_R_BAD_EXTENSION);
+            return 0;
+        }
+
+        /*
+         * Store the requested SNI in the SSL as temporary storage.
+         * If we accept it, it will get stored in the SSL_SESSION as well.
+         */
+        OPENSSL_free(s->ext.hostname);
+        s->ext.hostname = NULL;
+        if (!PACKET_strndup(&hostname, &s->ext.hostname)) {
+            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_CTOS_SERVER_NAME,
+                     ERR_R_INTERNAL_ERROR);
+            return 0;
+        }
+
+        s->servername_done = 1;
+    }
+    if (s->hit) {
+        /*
+         * TODO(openssl-team): if the SNI doesn't match, we MUST
+         * fall back to a full handshake.
+         */
+        s->servername_done = (s->session->ext.hostname != NULL)
+            && PACKET_equal(&hostname, s->session->ext.hostname,
+                            strlen(s->session->ext.hostname));
+
+        if (!s->servername_done && s->session->ext.hostname != NULL)
+            s->ext.early_data_ok = 0;
+    }
+
+    return 1;
+}
+
 int tls_parse_ctos_server_name(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx)
 {
@@ -1319,6 +1398,24 @@ EXT_RETURN tls_construct_stoc_renegotiate(SSL *s, WPACKET *pkt,
             || !WPACKET_close(pkt)
             || !WPACKET_close(pkt)) {
         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_STOC_RENEGOTIATE,
+                 ERR_R_INTERNAL_ERROR);
+        return EXT_RETURN_FAIL;
+    }
+
+    return EXT_RETURN_SENT;
+}
+
+EXT_RETURN tls_construct_stoc_middlebox(SSL *s, WPACKET *pkt,
+                                          unsigned int context, X509 *x,
+                                          size_t chainidx)
+{
+    if (s->hit || s->servername_done != 1
+            || s->ext.hostname == NULL)
+        return EXT_RETURN_NOT_SENT;
+
+    if (!WPACKET_put_bytes_u16(pkt, TLSEXT_TYPE_middlebox)
+            || !WPACKET_put_bytes_u16(pkt, 0)) {
+        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_STOC_SERVER_NAME,
                  ERR_R_INTERNAL_ERROR);
         return EXT_RETURN_FAIL;
     }

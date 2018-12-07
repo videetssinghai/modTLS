@@ -445,6 +445,7 @@ int ERR_load_SSL_strings(void);
 # define SSL_F_WPACKET_INTERN_INIT_LEN                    633
 # define SSL_F_WPACKET_START_SUB_PACKET_LEN__             634
 # define SSL_F_WRITE_STATE_MACHINE                        586
+# define SSL_F_TLS_CONSTRUCT_CTOS_MIDDLEBOX               987
 
 /*
  * SSL reason codes.

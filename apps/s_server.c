@@ -3068,7 +3068,7 @@ static int www_body(int s, int stype, int prot, unsigned char *context)
                     ERR_print_errors(bio_err);
                     goto err;
                 }
-                /* Wait for a ClientHello to come back */
+                /* Wait for a  to come back */
                 FD_ZERO(&readfds);
                 openssl_fdset(s, &readfds);
                 i = select(width, (void *)&readfds, NULL, NULL, NULL);

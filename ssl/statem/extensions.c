@@ -16,7 +16,9 @@
 
 static int final_renegotiate(SSL *s, unsigned int context, int sent);
 static int init_server_name(SSL *s, unsigned int context);
+static int init_middlebox(SSL *s, unsigned int context);
 static int final_server_name(SSL *s, unsigned int context, int sent);
+static int final_middlebox(SSL *s, unsigned int context, int sent);
 #ifndef OPENSSL_NO_EC
 static int final_ec_pt_formats(SSL *s, unsigned int context, int sent);
 #endif

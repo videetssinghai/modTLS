@@ -33,31 +33,31 @@ EXT_RETURN tls_construct_ctos_renegotiate(SSL *s, WPACKET *pkt,
     return EXT_RETURN_SENT;
 }
 
-EXT_RETURN tls_construct_ctos_middlebox(SSL *s, WPACKET *pkt,
-                                          unsigned int context, X509 *x,
-                                          size_t chainidx)
-{
- if (s->ext.hostname == NULL)
-        return EXT_RETURN_NOT_SENT;
+// EXT_RETURN tls_construct_ctos_middlebox(SSL *s, WPACKET *pkt,
+//                                           unsigned int context, X509 *x,
+//                                           size_t chainidx)
+// {
+//  if (s->ext.hostname == NULL)
+//         return EXT_RETURN_NOT_SENT;
 
-    /* Add TLS extension servername to the Client Hello message */
-    if (!WPACKET_put_bytes_u16(pkt, TLSEXT_TYPE_middlebox)
-               /* Sub-packet for server_name extension */
-            || !WPACKET_start_sub_packet_u16(pkt)
-               /* Sub-packet for servername list (always 1 hostname)*/
-            || !WPACKET_start_sub_packet_u16(pkt)
-            || !WPACKET_put_bytes_u8(pkt, TLSEXT_NAMETYPE_host_name)
-            || !WPACKET_sub_memcpy_u16(pkt, s->ext.hostname,
-                                       strlen(s->ext.hostname))
-            || !WPACKET_close(pkt)
-            || !WPACKET_close(pkt)) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CTOS_MIDDLEBOX,
-                 ERR_R_INTERNAL_ERROR);
-        return EXT_RETURN_FAIL;
-    }
+//     /* Add TLS extension servername to the Client Hello message */
+//     if (!WPACKET_put_bytes_u16(pkt, TLSEXT_TYPE_middlebox)
+//                /* Sub-packet for server_name extension */
+//             || !WPACKET_start_sub_packet_u16(pkt)
+//                /* Sub-packet for servername list (always 1 hostname)*/
+//             || !WPACKET_start_sub_packet_u16(pkt)
+//             || !WPACKET_put_bytes_u8(pkt, TLSEXT_NAMETYPE_host_name)
+//             || !WPACKET_sub_memcpy_u16(pkt, s->ext.hostname,
+//                                        strlen(s->ext.hostname))
+//             || !WPACKET_close(pkt)
+//             || !WPACKET_close(pkt)) {
+//         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_CONSTRUCT_CTOS_MIDDLEBOX,
+//                  ERR_R_INTERNAL_ERROR);
+//         return EXT_RETURN_FAIL;
+//     }
 
-    return EXT_RETURN_SENT;
-}
+//     return EXT_RETURN_SENT;
+// }
 
 
 
@@ -1350,37 +1350,37 @@ int tls_parse_stoc_maxfragmentlen(SSL *s, PACKET *pkt, unsigned int context,
     return 1;
 }
 
-int tls_parse_stoc_middlebox(SSL *s, PACKET *pkt, unsigned int context,
-                               X509 *x, size_t chainidx)
-{
-    if (s->ext.hostname == NULL) {
-        SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
-                 ERR_R_INTERNAL_ERROR);
-        return 0;
-    }
+// int tls_parse_stoc_middlebox(SSL *s, PACKET *pkt, unsigned int context,
+//                                X509 *x, size_t chainidx)
+// {
+//     if (s->ext.hostname == NULL) {
+//         SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
+//                  ERR_R_INTERNAL_ERROR);
+//         return 0;
+//     }
 
-    if (PACKET_remaining(pkt) > 0) {
-        SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
-                 SSL_R_BAD_EXTENSION);
-        return 0;
-    }
+//     if (PACKET_remaining(pkt) > 0) {
+//         SSLfatal(s, SSL_AD_DECODE_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
+//                  SSL_R_BAD_EXTENSION);
+//         return 0;
+//     }
 
-    if (!s->hit) {
-        if (s->session->ext.hostname != NULL) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
-                     ERR_R_INTERNAL_ERROR);
-            return 0;
-        }
-        s->session->ext.hostname = OPENSSL_strdup(s->ext.hostname);
-        if (s->session->ext.hostname == NULL) {
-            SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
-                     ERR_R_INTERNAL_ERROR);
-            return 0;
-        }
-    }
+//     if (!s->hit) {
+//         if (s->session->ext.hostname != NULL) {
+//             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
+//                      ERR_R_INTERNAL_ERROR);
+//             return 0;
+//         }
+//         s->session->ext.hostname = OPENSSL_strdup(s->ext.hostname);
+//         if (s->session->ext.hostname == NULL) {
+//             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_TLS_PARSE_STOC_SERVER_NAME,
+//                      ERR_R_INTERNAL_ERROR);
+//             return 0;
+//         }
+//     }
 
-    return 1;
-}
+//     return 1;
+// }
 
 int tls_parse_stoc_server_name(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx)

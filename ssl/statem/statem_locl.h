@@ -191,8 +191,8 @@ int tls_parse_ctos_renegotiate(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx);
 int tls_parse_ctos_server_name(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx);
-int tls_parse_ctos_middlebox(SSL *s, PACKET *pkt, unsigned int context,
-                               X509 *x, size_t chainidx);
+// int tls_parse_ctos_middlebox(SSL *s, PACKET *pkt, unsigned int context,
+//                                X509 *x, size_t chainidx);
 int tls_parse_ctos_maxfragmentlen(SSL *s, PACKET *pkt, unsigned int context,
                                   X509 *x, size_t chainidx);
 #ifndef OPENSSL_NO_SRP
@@ -248,9 +248,9 @@ EXT_RETURN tls_construct_stoc_renegotiate(SSL *s, WPACKET *pkt,
 EXT_RETURN tls_construct_stoc_server_name(SSL *s, WPACKET *pkt,
                                           unsigned int context, X509 *x,
                                           size_t chainidx);
-EXT_RETURN tls_construct_stoc_middlebox(SSL *s, WPACKET *pkt,
-                                          unsigned int context, X509 *x,
-                                          size_t chainidx);
+// EXT_RETURN tls_construct_stoc_middlebox(SSL *s, WPACKET *pkt,
+//                                           unsigned int context, X509 *x,
+//                                           size_t chainidx);
 EXT_RETURN tls_construct_stoc_early_data(SSL *s, WPACKET *pkt,
                                          unsigned int context, X509 *x,
                                          size_t chainidx);
@@ -312,8 +312,8 @@ EXT_RETURN tls_construct_ctos_renegotiate(SSL *s, WPACKET *pkt, unsigned int con
                                    X509 *x, size_t chainidx);
 EXT_RETURN tls_construct_ctos_server_name(SSL *s, WPACKET *pkt, unsigned int context,
                                    X509 *x, size_t chainidx);
-EXT_RETURN tls_construct_ctos_middlebox(SSL *s, WPACKET *pkt, unsigned int context,
-                                   X509 *x, size_t chainidx);
+// EXT_RETURN tls_construct_ctos_middlebox(SSL *s, WPACKET *pkt, unsigned int context,
+//                                    X509 *x, size_t chainidx);
 EXT_RETURN tls_construct_ctos_maxfragmentlen(SSL *s, WPACKET *pkt, unsigned int context,
                                              X509 *x, size_t chainidx);
 #ifndef OPENSSL_NO_SRP
@@ -383,8 +383,8 @@ int tls_parse_stoc_renegotiate(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx);
 int tls_parse_stoc_server_name(SSL *s, PACKET *pkt, unsigned int context,
                                X509 *x, size_t chainidx);
-int tls_parse_stoc_middlebox(SSL *s, PACKET *pkt, unsigned int context,
-                               X509 *x, size_t chainidx);
+// int tls_parse_stoc_middlebox(SSL *s, PACKET *pkt, unsigned int context,
+//                                X509 *x, size_t chainidx);
 int tls_parse_stoc_early_data(SSL *s, PACKET *pkt, unsigned int context,
                               X509 *x, size_t chainidx);
 int tls_parse_stoc_maxfragmentlen(SSL *s, PACKET *pkt, unsigned int context,

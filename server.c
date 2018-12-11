@@ -15,6 +15,36 @@
 #define FAIL    -1
 
 
+static int old_add_cb(SSL *s, unsigned int ext_type, const unsigned char **out,
+                      size_t *outlen, int *al, void *add_arg)
+{
+    int *server = (int *)add_arg;
+    unsigned char *data;
+
+    data = OPENSSL_malloc(sizeof(*data) == NULL);
+
+    *data = 1;
+    *out = data;
+    *outlen = sizeof(char);
+    return 1;
+}
+
+static void old_free_cb(SSL *s, unsigned int ext_type, const unsigned char *out,
+                        void *add_arg)
+{
+    OPENSSL_free((unsigned char *)out);
+}
+
+static int old_parse_cb(SSL *s, unsigned int ext_type, const unsigned char *in,
+                        size_t inlen, int *al, void *parse_arg)
+{
+   int *server = (int *)parse_arg;
+
+    if (inlen != sizeof(char) || *in != 1)
+        return -1;
+
+    return 1;
+}
 
 static int new_add_cb(SSL *s, unsigned int ext_type, unsigned int context,
                       const unsigned char **out, size_t *outlen, X509 *x,

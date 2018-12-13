@@ -1,4 +1,6 @@
+//SSL-Server.c
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
 #include <malloc.h>
@@ -8,78 +10,84 @@
 #include <netdb.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include "statem_locl.h"
 
 
 #define FAIL    -1
 
-int client=0;
+int client=1;
 
 static int old_add_cb(SSL *s, unsigned int ext_type, const unsigned char **out,
                       size_t *outlen, int *al, void *add_arg)
 {
+    printf("old_add_cb\n");
+    client = 2;
+ 
     int *server = (int *)add_arg;
-    unsigned char *data;
+     char *data;
+    unsigned char temp = 'a';
+   //  data = (char *)malloc(5*sizeof(char));
 
-    data = OPENSSL_malloc(sizeof(*data) == NULL);
+   // *data = "asss";
+   //   printf("sdsd %s\n", data);
+       *out = "d";
+       *outlen = sizeof(char); 
 
-    *data = 1;
-    *out = data;
-    *outlen = sizeof(char);
     return 1;
 }
 
 static void old_free_cb(SSL *s, unsigned int ext_type, const unsigned char *out,
                         void *add_arg)
-{
-    OPENSSL_free((unsigned char *)out);
+{ printf("old_free_cb\n");
+ // OPENSSL_free((unsigned char *)out);
 }
 
 static int old_parse_cb(SSL *s, unsigned int ext_type, const unsigned char *in,
                         size_t inlen, int *al, void *parse_arg)
 {
-   int *server = (int *)parse_arg;
+ printf("old_parse_cb\n");
+/*   int *server = (int *)parse_arg;
 
     if (inlen != sizeof(char) || *in != 1)
         return -1;
-
-    return 1;
+*/
+    return 1; 
 }
-
 
 static int new_add_cb(SSL *s, unsigned int ext_type, unsigned int context,
                       const unsigned char **out, size_t *outlen, X509 *x,
                       size_t chainidx, int *al, void *add_arg)
 {
-    int *server = (int *)add_arg;
-    unsigned char *data;
+    printf("new_add_cb");
+    
+      int *server = (int *)add_arg;
+     char *data;
+    unsigned char temp = 'a';
+   //  data = (char *)malloc(5*sizeof(char));
 
-    data = OPENSSL_malloc(sizeof(*data) == NULL);
-
-    *data = 1;
-    *out = data;
-    *outlen = sizeof(*data);
+   // *data = "asss";
+   //   printf("sdsd %s\n", data);
+       *out = "d";
+       *outlen = sizeof(char); 
     return 1;
 }
 
 static void new_free_cb(SSL *s, unsigned int ext_type, unsigned int context,
                         const unsigned char *out, void *add_arg)
-{
-    OPENSSL_free((unsigned char *)out);
+{    printf("new_free_cb");
+  //  OPENSSL_free((unsigned char *)out);
 }
 
 static int new_parse_cb(SSL *s, unsigned int ext_type, unsigned int context,
                         const unsigned char *in, size_t inlen, X509 *x,
                         size_t chainidx, int *al, void *parse_arg)
 {
-    int *server = (int *)parse_arg;
-
-    if (inlen != sizeof(char) || *in != 1)
-        return -1;
+ //   int *server = (int *)parse_arg;
+    printf("new_parse_cb");
+    // if (inlen != sizeof(char) || *in != 1)
+    //     return -1;
 
     return 1;
 }
-
 
 int OpenConnection(const char *hostname, int port)
 {   int sd;
@@ -155,16 +163,29 @@ int main(int count, char *strings[])
         exit(0);
     }
     SSL_library_init();
-    SSL_CTX_add_custom_ext(ctx, 999, SSL_EXT_CLIENT_HELLO, new_add_cb, new_free_cb, &client, new_parse_cb, &client);
-
     hostname=strings[1];
     portnum=strings[2];
 
     ctx = InitCTX();
+
+
+int result = SSL_CTX_add_custom_ext(ctx, 1000, SSL_EXT_CLIENT_HELLO, new_add_cb, new_free_cb, NULL, new_parse_cb, NULL);
+
+printf("register extension %d\n",result);
+printf("register %d\n",client);    
+   
     server = OpenConnection(hostname, atoi(portnum));
-    ssl = SSL_new(ctx);      /* create new SSL connection state */
-    SSL_set_fd(ssl, server);    /* attach the socket descriptor */
-    if ( SSL_connect(ssl) == FAIL )   /* perform the connection */
+
+
+
+
+   
+ ssl = SSL_new(ctx);      /* create new SSL connection state */
+
+
+SSL_set_fd(ssl, server);    /* attach the socket descriptor */
+ 
+   if ( SSL_connect(ssl) == FAIL )   /* perform the connection */
         ERR_print_errors_fp(stderr);
     else
     {   char *msg = "Hello???";
@@ -181,3 +202,4 @@ int main(int count, char *strings[])
     SSL_CTX_free(ctx);        /* release context */
     return 0;
 }
+

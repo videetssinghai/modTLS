@@ -10,60 +10,66 @@
 #include <resolv.h>
 #include "openssl/ssl.h"
 #include "openssl/err.h"
-#include "statem_locl.h"
 
 #define FAIL    -1
 
+int client=1;
 
 static int old_add_cb(SSL *s, unsigned int ext_type, const unsigned char **out,
                       size_t *outlen, int *al, void *add_arg)
 {
-    int *server = (int *)add_arg;
+ printf("old_add_cb\n");
+ /*   int *server = (int *)add_arg;
     unsigned char *data;
 
     data = OPENSSL_malloc(sizeof(*data) == NULL);
 
     *data = 1;
     *out = data;
-    *outlen = sizeof(char);
+    *outlen = sizeof(char); */
     return 1;
 }
 
 static void old_free_cb(SSL *s, unsigned int ext_type, const unsigned char *out,
                         void *add_arg)
-{
+{   printf("old_free_cb\n");
     OPENSSL_free((unsigned char *)out);
 }
 
 static int old_parse_cb(SSL *s, unsigned int ext_type, const unsigned char *in,
                         size_t inlen, int *al, void *parse_arg)
 {
-   int *server = (int *)parse_arg;
+ printf("old_parse_cb\n");
+  printf("data %c\n", *in);
 
+
+   /* int *server = (int *)parse_arg;
+ 
     if (inlen != sizeof(char) || *in != 1)
         return -1;
-
-    return 1;
+*/
+    return 1; 
 }
 
 static int new_add_cb(SSL *s, unsigned int ext_type, unsigned int context,
                       const unsigned char **out, size_t *outlen, X509 *x,
                       size_t chainidx, int *al, void *add_arg)
 {
-    int *server = (int *)add_arg;
-    unsigned char *data;
+    printf("new_add_cb\n");
+    // int *server = (int *)add_arg;
+    // unsigned char *data;
 
-    data = OPENSSL_malloc(sizeof(*data) == NULL);
+    // data = OPENSSL_malloc(sizeof(*data) == NULL);
 
-    *data = 1;
-    *out = data;
-    *outlen = sizeof(*data);
+    // *data = 1;
+    // *out = data;
+    // *outlen = sizeof(*data);
     return 1;
 }
 
 static void new_free_cb(SSL *s, unsigned int ext_type, unsigned int context,
                         const unsigned char *out, void *add_arg)
-{
+{    printf("new_free_cb\n");
     OPENSSL_free((unsigned char *)out);
 }
 
@@ -71,11 +77,8 @@ static int new_parse_cb(SSL *s, unsigned int ext_type, unsigned int context,
                         const unsigned char *in, size_t inlen, X509 *x,
                         size_t chainidx, int *al, void *parse_arg)
 {
-    int *server = (int *)parse_arg;
-
-    if (inlen != sizeof(char) || *in != 1)
-        return -1;
-
+ printf("new_parse_cb\n");
+ printf("data %c\n", *in);
     return 1;
 }
 
@@ -120,7 +123,7 @@ SSL_CTX* InitServerCTX(void)
 
     OpenSSL_add_all_algorithms();  /* load & register all cryptos, etc. */
     SSL_load_error_strings();   /* load all error messages */
-    method = TLSv1_2_server_method();  /* create new server-method instance */
+    method = TLS_server_method();  /* create new server-method instance */
     ctx = SSL_CTX_new(method);   /* create new context from method */
     if ( ctx == NULL )
     {
@@ -215,13 +218,18 @@ int main(int count, char *strings[])
         exit(0);
     }
     SSL_library_init();
-    SSL_CTX_add_custom_ext(ctx, 999, SSL_EXT_CLIENT_HELLO, new_add_cb, new_free_cb, &client, new_parse_cb, &client);
-
+    
     portnum = strings[1];
     ctx = InitServerCTX();        /* initialize SSL */
+
+int res = SSL_CTX_add_custom_ext(ctx, 1000, SSL_EXT_CLIENT_HELLO, new_add_cb, new_free_cb, NULL, new_parse_cb, NULL);
+
+printf("reg ext %d\n",res);
+
     LoadCertificates(ctx, "mycert.pem", "mycert.pem"); /* load certs */
     server = OpenListener(atoi(portnum));    /* create server socket */
-    while (1)
+    
+while (1)
     {   struct sockaddr_in addr;
         socklen_t len = sizeof(addr);
         SSL *ssl;

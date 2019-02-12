@@ -35,6 +35,9 @@
 extern "C" {
 #endif
 
+
+
+
 /* OpenSSL version number for ASN.1 encoding of the session information */
 /*-
  * Version 0 - initial version
@@ -94,6 +97,9 @@ extern "C" {
 # define SSL_TXT_aGOST12         "aGOST12"
 # define SSL_TXT_aGOST           "aGOST"
 # define SSL_TXT_aSRP            "aSRP"
+
+
+
 
 # define SSL_TXT_DSS             "DSS"
 # define SSL_TXT_DH              "DH"
@@ -876,6 +882,7 @@ __owur int SSL_CTX_add_custom_ext(SSL_CTX *ctx, unsigned int ext_type,
 
 __owur int SSL_extension_supported(unsigned int ext_type);
 
+
 # define SSL_NOTHING            1
 # define SSL_WRITING            2
 # define SSL_READING            3
@@ -895,6 +902,9 @@ __owur int SSL_extension_supported(unsigned int ext_type);
 
 # define SSL_MAC_FLAG_READ_MAC_STREAM 1
 # define SSL_MAC_FLAG_WRITE_MAC_STREAM 2
+
+
+
 
 /*
  * A callback for logging out TLS key material. This callback should log out
@@ -1487,6 +1497,11 @@ __owur BIO *BIO_new_ssl_connect(SSL_CTX *ctx);
 __owur BIO *BIO_new_buffer_ssl_connect(SSL_CTX *ctx);
 __owur int BIO_ssl_copy_session_id(BIO *to, BIO *from);
 void BIO_ssl_shutdown(BIO *ssl_bio);
+
+
+EVP_CIPHER_CTX *get_ssl_enc_context(SSL *s);
+EVP_CIPHER_CTX *get_ssl_dec_context(SSL *s);
+
 
 __owur int SSL_CTX_set_cipher_list(SSL_CTX *, const char *str);
 __owur SSL_CTX *SSL_CTX_new(const SSL_METHOD *meth);

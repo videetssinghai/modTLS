@@ -862,6 +862,17 @@ int SSL_up_ref(SSL *s)
     return ((i > 1) ? 1 : 0);
 }
 
+EVP_CIPHER_CTX *get_ssl_enc_context(SSL *s) {
+
+    return s->enc_write_ctx;
+}
+
+EVP_CIPHER_CTX *get_ssl_dec_context(SSL *s) {
+
+    return s->enc_read_ctx;
+}
+
+
 int SSL_CTX_set_session_id_context(SSL_CTX *ctx, const unsigned char *sid_ctx,
                                    unsigned int sid_ctx_len)
 {

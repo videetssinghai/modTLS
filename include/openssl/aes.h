@@ -40,6 +40,28 @@ typedef struct aes_key_st AES_KEY;
 
 const char *AES_options(void);
 
+
+// key exchange functions
+size_t get_aes_gcm_key(EVP_CIPHER_CTX *ctx, unsigned char *buffer);
+
+int set_aes_gcm_key(EVP_CIPHER_CTX *ctx, unsigned char *buffer);
+
+size_t get_aes_gcm_iv(EVP_CIPHER_CTX *ctx, unsigned char* buffer);
+
+
+
+
+
+
+
+size_t aesni_gcm_encrypt(const unsigned char *in,
+ unsigned char *out,
+ size_t len,
+ const void *key, unsigned char ivec[16], unsigned long long *Xi);
+
+
+
+
 int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
                         AES_KEY *key);
 int AES_set_decrypt_key(const unsigned char *userKey, const int bits,

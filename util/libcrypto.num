@@ -4603,3 +4603,6 @@ SRP_user_pwd_new                        4556	1_1_2	EXIST::FUNCTION:SRP
 SRP_user_pwd_set_gN                     4557	1_1_2	EXIST::FUNCTION:SRP
 SRP_user_pwd_set1_ids                   4558	1_1_2	EXIST::FUNCTION:SRP
 SRP_user_pwd_set0_sv                    4559	1_1_2	EXIST::FUNCTION:SRP
+get_aes_gcm_key							4560	1_1_0   EXIST::FUNCTION:
+set_aes_gcm_key							4561	1_1_0   EXIST::FUNCTION:
+get_aes_gcm_iv							4562	1_1_0   EXIST::FUNCTION:	

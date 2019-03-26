@@ -845,80 +845,80 @@ int ssl3_do_compress(SSL *ssl, SSL3_RECORD *wr)
  */
 int ssl3_enc(SSL *s, SSL3_RECORD *inrecs, size_t n_recs, int sending)
 {
-    SSL3_RECORD *rec;
-    EVP_CIPHER_CTX *ds;
-    size_t l, i;
-    size_t bs, mac_size = 0;
-    int imac_size;
-    const EVP_CIPHER *enc;
+    // SSL3_RECORD *rec;
+    // EVP_CIPHER_CTX *ds;
+    // size_t l, i;
+    // size_t bs, mac_size = 0;
+    // int imac_size;
+    // const EVP_CIPHER *enc;
 
-    rec = inrecs;
-    /*
-     * We shouldn't ever be called with more than one record in the SSLv3 case
-     */
-    if (n_recs != 1)
-        return 0;
-    if (sending) {
-        ds = s->enc_write_ctx;
-        if (s->enc_write_ctx == NULL)
-            enc = NULL;
-        else
-            enc = EVP_CIPHER_CTX_cipher(s->enc_write_ctx);
-    } else {
-        ds = s->enc_read_ctx;
-        if (s->enc_read_ctx == NULL)
-            enc = NULL;
-        else
-            enc = EVP_CIPHER_CTX_cipher(s->enc_read_ctx);
-    }
+    // rec = inrecs;
+    // /*
+    //  * We shouldn't ever be called with more than one record in the SSLv3 case
+    //  */
+    // if (n_recs != 1)
+    //     return 0;
+    // if (sending) {
+    //     ds = s->enc_write_ctx;
+    //     if (s->enc_write_ctx == NULL)
+    //         enc = NULL;
+    //     else
+    //         enc = EVP_CIPHER_CTX_cipher(s->enc_write_ctx);
+    // } else {
+    //     ds = s->enc_read_ctx;
+    //     if (s->enc_read_ctx == NULL)
+    //         enc = NULL;
+    //     else
+    //         enc = EVP_CIPHER_CTX_cipher(s->enc_read_ctx);
+    // }
 
-    if ((s->session == NULL) || (ds == NULL) || (enc == NULL)) {
-        memmove(rec->data, rec->input, rec->length);
-        rec->input = rec->data;
-    } else {
-        l = rec->length;
-        /* TODO(size_t): Convert this call */
-        bs = EVP_CIPHER_CTX_block_size(ds);
+    // if ((s->session == NULL) || (ds == NULL) || (enc == NULL)) {
+    //     memmove(rec->data, rec->input, rec->length);
+    //     rec->input = rec->data;
+    // } else {
+    //     l = rec->length;
+    //     /* TODO(size_t): Convert this call */
+    //     bs = EVP_CIPHER_CTX_block_size(ds);
 
-        /* COMPRESS */
+    //     /* COMPRESS */
 
-        if ((bs != 1) && sending) {
-            i = bs - (l % bs);
+    //     if ((bs != 1) && sending) {
+    //         i = bs - (l % bs);
 
-            /* we need to add 'i-1' padding bytes */
-            l += i;
-            /*
-             * the last of these zero bytes will be overwritten with the
-             * padding length.
-             */
-            memset(&rec->input[rec->length], 0, i);
-            rec->length += i;
-            rec->input[l - 1] = (unsigned char)(i - 1);
-        }
+    //         /* we need to add 'i-1' padding bytes */
+    //         l += i;
+    //         /*
+    //          * the last of these zero bytes will be overwritten with the
+    //          * padding length.
+    //          */
+    //         memset(&rec->input[rec->length], 0, i);
+    //         rec->length += i;
+    //         rec->input[l - 1] = (unsigned char)(i - 1);
+    //     }
 
-        if (!sending) {
-            if (l == 0 || l % bs != 0)
-                return 0;
-            /* otherwise, rec->length >= bs */
-        }
+    //     if (!sending) {
+    //         if (l == 0 || l % bs != 0)
+    //             return 0;
+    //         /* otherwise, rec->length >= bs */
+    //     }
 
-        /* TODO(size_t): Convert this call */
-        if (EVP_Cipher(ds, rec->data, rec->input, (unsigned int)l) < 1)
-            return -1;
+    //     /* TODO(size_t): Convert this call */
+    //     if (EVP_Cipher(ds, rec->data, rec->input, (unsigned int)l) < 1)
+    //         return -1;
 
-        if (EVP_MD_CTX_md(s->read_hash) != NULL) {
-            /* TODO(size_t): convert me */
-            imac_size = EVP_MD_CTX_size(s->read_hash);
-            if (imac_size < 0) {
-                SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_ENC,
-                         ERR_R_INTERNAL_ERROR);
-                return -1;
-            }
-            mac_size = (size_t)imac_size;
-        }
-        if ((bs != 1) && !sending)
-            return ssl3_cbc_remove_padding(rec, bs, mac_size);
-    }
+    //     if (EVP_MD_CTX_md(s->read_hash) != NULL) {
+    //         /* TODO(size_t): convert me */
+    //         imac_size = EVP_MD_CTX_size(s->read_hash);
+    //         if (imac_size < 0) {
+    //             SSLfatal(s, SSL_AD_INTERNAL_ERROR, SSL_F_SSL3_ENC,
+    //                      ERR_R_INTERNAL_ERROR);
+    //             return -1;
+    //         }
+    //         mac_size = (size_t)imac_size;
+    //     }
+    //     if ((bs != 1) && !sending)
+    //         return ssl3_cbc_remove_padding(rec, bs, mac_size);
+    // }
     return 1;
 }
 
@@ -935,7 +935,7 @@ int ssl3_enc(SSL *s, SSL3_RECORD *inrecs, size_t n_recs, int sending)
  *       an internal error occurred.
  */
 int tls1_enc(SSL *s, SSL3_RECORD *recs, size_t n_recs, int sending)
-{
+{ 
     EVP_CIPHER_CTX *ds;
     size_t reclen[SSL_MAX_PIPELINES];
     unsigned char buf[SSL_MAX_PIPELINES][EVP_AEAD_TLS1_AAD_LEN];

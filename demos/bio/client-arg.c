@@ -11,6 +11,44 @@
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 
+
+static int new_add_cb(SSL *s, unsigned int ext_type, unsigned int context,
+                      const unsigned char **out, size_t *outlen, X509 *x,
+                      size_t chainidx, int *al, void *add_arg)
+{
+    printf("new_add_cb");
+    int *server = (int *)add_arg;
+    unsigned char *data;
+
+    data = OPENSSL_malloc(sizeof(*data) == NULL);
+
+    *data = 1;
+    *out = data;
+    *outlen = sizeof(*data);
+    return 1;
+}
+
+static void new_free_cb(SSL *s, unsigned int ext_type, unsigned int context,
+                        const unsigned char *out, void *add_arg)
+{    printf("new_free_cb");
+    OPENSSL_free((unsigned char *)out);
+}
+
+static int new_parse_cb(SSL *s, unsigned int ext_type, unsigned int context,
+                        const unsigned char *in, size_t inlen, X509 *x,
+                        size_t chainidx, int *al, void *parse_arg)
+{
+    int *server = (int *)parse_arg;
+    printf("new_parse_cb");
+    if (inlen != sizeof(char) || *in != 1)
+        return -1;
+
+    return 1;
+}
+
+
+int client = 1;
+
 int main(int argc, char **argv)
 {
     BIO *sbio = NULL, *out = NULL;
@@ -70,9 +108,10 @@ int main(int argc, char **argv)
      * because as things stand this will connect to * any server whose
      * certificate is signed by any CA.
      */
-
+   
     sbio = BIO_new_ssl_connect(ctx);
-
+int result = SSL_CTX_add_custom_ext(ctx, 0xff00, SSL_EXT_CLIENT_HELLO, new_add_cb, new_free_cb, &client, new_parse_cb, &client);
+printf("register extension %d\n",result); 
     BIO_get_ssl(sbio, &ssl);
 
     if (!ssl) {

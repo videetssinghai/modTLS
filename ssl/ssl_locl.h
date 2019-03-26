@@ -40,6 +40,9 @@
 #  define OPENSSL_EXTERN OPENSSL_EXPORT
 # endif
 
+
+
+
 # define c2l(c,l)        (l = ((unsigned long)(*((c)++)))     , \
                          l|=(((unsigned long)(*((c)++)))<< 8), \
                          l|=(((unsigned long)(*((c)++)))<<16), \
@@ -2224,6 +2227,8 @@ struct openssl_ssl_test_functions {
     int (*p_ssl_init_wbio_buffer) (SSL *s);
     int (*p_ssl3_setup_buffers) (SSL *s);
 };
+
+
 
 const char *ssl_protocol_to_string(int version);
 
